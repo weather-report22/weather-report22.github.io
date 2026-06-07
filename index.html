@@ -2,329 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Бездна — веб-ранобэ | официальный сайт</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Бездна — веб-ранобэ</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* ========== ТЕМЫ ========== */
-        body.dark {
-            --bg1: #020c1a;
-            --bg2: #061d30;
-            --text: #e0f2fe;
-            --surface: rgba(6, 25, 45, 0.85);
-            --accent: #00aaff;
-            --border: #2c6f9b;
-            --btn: #1a4d6b;
-            --card-bg: rgba(8, 28, 48, 0.9);
-        }
-        body.light {
-            --bg1: #e9f5ff;
-            --bg2: #cfe3f5;
-            --text: #022c44;
-            --surface: rgba(240, 248, 255, 0.9);
-            --accent: #0077be;
-            --border: #8bb9d0;
-            --btn: #5f9dc9;
-            --card-bg: rgba(255, 255, 255, 0.85);
-        }
-        body {
-            background: linear-gradient(145deg, var(--bg1), var(--bg2));
-            color: var(--text);
-            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
-            line-height: 1.6;
-            transition: background 0.3s ease, color 0.2s;
-            min-height: 100vh;
-        }
-
-        /* живой фон */
-        .animated-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            pointer-events: none;
-            overflow: hidden;
-        }
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: repeating-linear-gradient( transparent 20%, rgba(0,170,255,0.05) 50%);
-            animation: slowDrift 22s infinite linear;
-            opacity: 0.4;
-            transition: transform 0.05s linear;
-        }
-        .wave:nth-child(2) {
-            animation-duration: 35s;
-            opacity: 0.2;
-            background: repeating-linear-gradient(45deg, rgba(0,200,255,0.02), rgba(0,100,150,0.06));
-        }
-        @keyframes slowDrift {
-            0% { transform: translateX(0) translateY(0);}
-            100% { transform: translateX(-50%) translateY(-4%);}
-        }
-        body.light .wave { opacity: 0.08; }
-        .scroll-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 20% 30%, transparent, rgba(0,0,0,0.15));
-            pointer-events: none;
-        }
-
-        /* навигация */
-        .sticky-nav {
-            position: sticky;
-            top: 0;
-            backdrop-filter: blur(16px);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-            padding: 0.8rem 1rem;
-            z-index: 50;
-            border-bottom: 1px solid var(--accent);
-            background: var(--surface);
-        }
-        button, .nav-btn, .theme-toggle, .dev-toggle {
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            cursor: pointer;
-        }
-        button:hover, .nav-btn:hover {
-            transform: scale(1.02);
-            filter: brightness(1.08);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body.dark { --bg1: #020c1a; --bg2: #061d30; --text: #e0f2fe; --surface: rgba(6,25,45,0.85); --accent: #00aaff; --border: #2c6f9b; --btn: #1a4d6b; --card-bg: rgba(8,28,48,0.9); }
+        body.light { --bg1: #e9f5ff; --bg2: #cfe3f5; --text: #022c44; --surface: rgba(240,248,255,0.9); --accent: #0077be; --border: #8bb9d0; --btn: #5f9dc9; --card-bg: rgba(255,255,255,0.85); }
+        body { background: linear-gradient(145deg, var(--bg1), var(--bg2)); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; line-height: 1.6; transition: background 0.3s, color 0.2s; min-height: 100vh; }
+        .animated-bg { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-2; pointer-events:none; overflow:hidden; }
+        .wave { position: absolute; bottom:0; left:0; width:200%; height:100%; background: repeating-linear-gradient(transparent 20%, rgba(0,170,255,0.05) 50%); animation: slowDrift 22s infinite linear; opacity:0.4; transition: transform 0.05s linear; }
+        .wave:nth-child(2) { animation-duration: 35s; opacity:0.2; background: repeating-linear-gradient(45deg, rgba(0,200,255,0.02), rgba(0,100,150,0.06)); }
+        @keyframes slowDrift { 0% { transform:translateX(0) translateY(0); } 100% { transform:translateX(-50%) translateY(-4%); } }
+        body.light .wave { opacity:0.08; }
+        .scroll-gradient { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 20% 30%, transparent, rgba(0,0,0,0.15)); pointer-events: none; }
+        .sticky-nav { position: sticky; top:0; backdrop-filter: blur(16px); display: flex; flex-wrap: wrap; gap:0.5rem; justify-content: center; padding:0.8rem 1rem; z-index:50; border-bottom:1px solid var(--accent); background: var(--surface); }
+        button, .nav-btn, .theme-toggle, .dev-toggle { transition: all 0.2s ease; cursor: pointer; }
+        button:hover, .nav-btn:hover { transform: scale(1.02); filter: brightness(1.08); }
         button:active { transform: scale(0.96); }
-
-        /* главная страница (лендинг) */
-        .hero {
-            min-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
-            background: radial-gradient(ellipse at 30% 40%, rgba(0,20,40,0.6), rgba(0,0,0,0.3));
-            border-radius: 0 0 50px 50px;
-        }
-        .hero .logo {
-            font-size: 5rem;
-            font-weight: 800;
-            text-shadow: 0 0 20px var(--accent);
-            background: linear-gradient(135deg, #c3eaff, #3ea5ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1rem;
-        }
-        .hero .tagline {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn-large {
-            background: var(--btn);
-            padding: 12px 32px;
-            border-radius: 60px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-        .cover-img {
-            width: 220px;
-            height: 300px;
-            background: linear-gradient(145deg, #0a3b55, #021c2c);
-            border-radius: 20px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid var(--accent);
-        }
-
-        /* секции */
-        .section {
-            display: none;
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1.2rem 4rem;
-            animation: fadeSlide 0.3s ease;
-        }
+        .hero { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding:2rem; background: radial-gradient(ellipse at 30% 40%, rgba(0,20,40,0.6), rgba(0,0,0,0.3)); border-radius: 0 0 50px 50px; }
+        .hero .logo { font-size: 5rem; font-weight:800; text-shadow:0 0 20px var(--accent); background:linear-gradient(135deg,#c3eaff,#3ea5ff); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:1rem; }
+        .hero .tagline { font-size:1.2rem; max-width:600px; margin-bottom:2rem; }
+        .hero-buttons { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+        .btn-large { background: var(--btn); padding:12px 32px; border-radius:60px; font-size:1.1rem; font-weight:bold; border:none; color:white; cursor:pointer; }
+        .cover-img { width:220px; height:300px; background:linear-gradient(145deg,#0a3b55,#021c2c); border-radius:20px; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:center; font-size:2rem; box-shadow:0 10px 25px rgba(0,0,0,0.5); border:1px solid var(--accent); }
+        .section { display: none; max-width:1200px; margin:2rem auto; padding:0 1.2rem 4rem; animation: fadeSlide 0.3s ease; }
         .active-section { display: block; }
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(12px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(8px);
-            border-radius: 28px;
-            padding: 1.8rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--accent);
-        }
-
-        /* карточки персонажей */
-        .characters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-        .character-card {
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 1rem;
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: transform 0.2s;
-        }
-        .character-card:hover { transform: translateY(-5px); }
-        .char-avatar {
-            width: 120px;
-            height: 120px;
-            background: #2c5a7a;
-            border-radius: 50%;
-            margin: 0 auto 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: white;
-        }
-        .char-name { font-size: 1.3rem; font-weight: bold; }
-        .char-role { font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.5rem;}
-
-        /* глубина */
-        .depth-tower {
-            position: fixed;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(2,18,30,0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 2rem;
-            padding: 0.6rem 0.4rem;
-            z-index: 40;
-            font-size: 0.7rem;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .depth-tower span {
-            text-align: center;
-            background: #0a2a44cc;
-            padding: 2px 8px;
-            border-radius: 20px;
-            transition: all 0.2s;
-            cursor: default;
-        }
-        .depth-tower span.active {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 0 8px var(--accent);
-        }
-        @media (max-width: 780px) { .depth-tower { display: none; } }
-
-        /* читалка */
-        #chapterContent { line-height: 1.7; font-size: 1.2rem; }
-        #chapterContent p { margin-bottom: 1rem; }
-        .dev-panel {
-            display: none;
-            margin-top: 2rem;
-            background: #071e30dd;
-            border-radius: 24px;
-            padding: 1rem;
-        }
-        .dev-panel.open { display: block; }
-        .dev-panel textarea, .dev-panel input {
-            width: 100%;
-            background: #031826;
-            border: 1px solid var(--accent);
-            border-radius: 18px;
-            padding: 12px;
-            color: #ddf4ff;
-            font-family: monospace;
-            margin-bottom: 8px;
-        }
-        .btn-sm {
-            background: var(--btn);
-            padding: 8px 16px;
-            border-radius: 60px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            margin: 4px;
-        }
-        .chapter-selector {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-        .chapter-nav {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 12px;
-            z-index: 60;
-        }
-        .chapter-nav button {
-            background: var(--btn);
-            width: 48px;
-            height: 48px;
-            border-radius: 40px;
-            font-size: 1.8rem;
-            border: none;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .search-box {
-            margin-bottom: 10px;
-            width: 100%;
-            padding: 8px;
-            border-radius: 40px;
-            border: 1px solid var(--accent);
-            background: var(--surface);
-            color: var(--text);
-        }
-        footer { text-align: center; padding: 2rem; opacity: 0.6; }
-        .hotkey-hint { font-size: 0.7rem; margin-left: 8px; opacity: 0.7; }
+        @keyframes fadeSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .card { background: var(--card-bg); backdrop-filter: blur(8px); border-radius:28px; padding:1.8rem; margin-bottom:2rem; border:1px solid var(--accent); }
+        .characters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:1.5rem; margin-top:1rem; }
+        .character-card { background: var(--surface); border-radius:20px; padding:1rem; text-align:center; border:1px solid var(--border); transition: transform 0.2s; }
+        .character-card:hover { transform:translateY(-5px); }
+        .char-avatar { width:120px; height:120px; background:#2c5a7a; border-radius:50%; margin:0 auto 0.8rem; display:flex; align-items:center; justify-content:center; font-size:3rem; color:white; }
+        .char-name { font-size:1.3rem; font-weight:bold; }
+        .char-role { font-size:0.8rem; opacity:0.8; margin-bottom:0.5rem; }
+        .depth-tower { position:fixed; left:1rem; top:50%; transform:translateY(-50%); background:rgba(2,18,30,0.7); backdrop-filter:blur(12px); border-radius:2rem; padding:0.6rem 0.4rem; z-index:40; font-size:0.7rem; display:flex; flex-direction:column; gap:6px; }
+        .depth-tower span { text-align:center; background:#0a2a44cc; padding:2px 8px; border-radius:20px; transition:all 0.2s; cursor:default; }
+        .depth-tower span.active { background:var(--accent); color:white; box-shadow:0 0 8px var(--accent); }
+        @media (max-width:780px) { .depth-tower { display:none; } }
+        #chapterContent { line-height:1.7; font-size:1.2rem; }
+        #chapterContent p { margin-bottom:1rem; }
+        .dev-panel { display:none; margin-top:2rem; background:#071e30dd; border-radius:24px; padding:1rem; }
+        .dev-panel.open { display:block; }
+        .dev-panel textarea, .dev-panel input, .dev-panel select { width:100%; background:#031826; border:1px solid var(--accent); border-radius:18px; padding:12px; color:#ddf4ff; font-family:monospace; margin-bottom:8px; }
+        .btn-sm { background: var(--btn); padding:8px 16px; border-radius:60px; border:none; color:white; cursor:pointer; margin:4px; }
+        .chapter-selector { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; }
+        .chapter-nav { position:fixed; bottom:20px; right:20px; display:flex; gap:12px; z-index:60; }
+        .chapter-nav button { background: var(--btn); width:48px; height:48px; border-radius:40px; font-size:1.8rem; border:none; color:white; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
+        .search-box { margin-bottom:10px; width:100%; padding:8px; border-radius:40px; border:1px solid var(--accent); background: var(--surface); color: var(--text); }
+        footer { text-align:center; padding:2rem; opacity:0.6; }
+        .hotkey-hint { font-size:0.7rem; margin-left:8px; opacity:0.7; }
+        .sync-status { font-size:0.8rem; margin-left:10px; background: var(--accent); padding:2px 8px; border-radius:20px; }
     </style>
 </head>
 <body class="dark">
 <div class="animated-bg"><div class="wave" id="wave1"></div><div class="wave" id="wave2"></div></div>
 <div class="scroll-gradient"></div>
 
-<!-- фиксированная глубина -->
 <div class="depth-tower" id="depthTower">
     <span data-depth="0">0км</span><span data-depth="1">1км</span><span data-depth="2">2км</span><span data-depth="3">3км</span>
     <span data-depth="4">4км</span><span data-depth="5">5км</span><span data-depth="6">6км</span><span data-depth="7">7км</span>
@@ -339,9 +72,10 @@
     <button class="theme-toggle" id="themeToggle">🌓 Тема</button>
     <button class="dev-toggle" id="devToggleBtn">⚙️ Правка</button>
     <span class="hotkey-hint">[Ctrl+E]</span>
+    <span id="syncStatus" class="sync-status">☁️ загрузка...</span>
 </div>
 
-<!-- ГЛАВНАЯ СТРАНИЦА -->
+<!-- ГЛАВНАЯ -->
 <section id="home" class="section">
     <div class="hero">
         <div class="cover-img">🌊 БЕЗДНА 🌊</div>
@@ -352,10 +86,7 @@
             <button class="btn-large" id="heroLoreBtn">📚 Энциклопедия</button>
         </div>
     </div>
-    <div class="card">
-        <h2>О проекте</h2>
-        <p>Мир на 95% состоит из воды. Мембранные барьеры скрывают ёкаев и неведомые глубины. Исследуйте контракты, сражайтесь с пожирателями и раскройте тайну 11-го уровня.</p>
-    </div>
+    <div class="card"><h2>О проекте</h2><p>Мир на 95% состоит из воды. Мембранные барьеры скрывают ёкаев и неведомые глубины. Контент загружается из JSON-файла — автор обновляет его на GitHub, и читатели видят свежие главы через минуту.</p></div>
 </section>
 
 <!-- ЧИТАЛКА -->
@@ -373,47 +104,35 @@
             <input type="text" id="chapterTitleInput" placeholder="Название главы">
             <textarea id="rawTextInput" rows="6" placeholder="Текст главы (автоформат абзацев)"></textarea>
             <select id="depthSelect"><option value="0">0 км</option><option value="1">1 км</option><option value="2">2 км</option><option value="3">3 км</option><option value="4">4 км</option><option value="5">5 км</option><option value="6">6 км</option><option value="7">7 км</option><option value="8">8 км</option><option value="9">9 км</option><option value="10">10 км</option><option value="11">11 км</option></select>
-            <div><button id="applyTextFormatBtn" class="btn-sm">✨ Сохранить главу</button>
+            <div><button id="applyTextFormatBtn" class="btn-sm">💾 Сохранить локально</button>
             <button id="exportAllBtn" class="btn-sm">📤 Экспорт JSON</button>
             <button id="importJsonBtn" class="btn-sm">📂 Импорт JSON</button>
             <input type="file" id="jsonFileInput" accept=".json" style="display:none"></div>
+            <p style="font-size:0.7rem; margin-top:8px;">※ Локальные правки сохраняются только в вашем браузере. Чтобы обновить сайт для всех, отредактируйте <strong>content.json</strong> на GitHub.</p>
         </div>
     </div>
 </section>
 
-<!-- ЭНЦИКЛОПЕДИЯ (ЛОР) -->
-<section id="lore" class="section">
-    <div class="card"><h2>🌊 Мир Бездны</h2><div id="loreContent"></div></div>
-</section>
+<!-- ЭНЦИКЛОПЕДИЯ -->
+<section id="lore" class="section"><div class="card"><h2>🌊 Мир Бездны</h2><div id="loreContent"></div></div></section>
 
-<!-- ПЕРСОНАЖИ (карточки) -->
-<section id="characters" class="section">
-    <div class="card">
-        <h2>🗡️ Герои Бездны</h2>
-        <div id="charactersGrid" class="characters-grid"></div>
-    </div>
-</section>
+<!-- ПЕРСОНАЖИ -->
+<section id="characters" class="section"><div class="card"><h2>🗡️ Герои Бездны</h2><div id="charactersGrid" class="characters-grid"></div></div></section>
 
 <div class="chapter-nav"><button id="mobilePrev">◀</button><button id="mobileNext">▶</button></div>
-<footer>«Бездна» — веб-ранобэ | Ctrl+E для редактора | Свайп/стрелки</footer>
+<footer>«Бездна» — контент из content.json | Ctrl+E для локального редактирования | Данные кэшируются в браузере</footer>
 
 <script>
-    // ========== ДАННЫЕ ГЛАВ С ГЛУБИНОЙ ==========
-    let chapters = [
-        { title: "Пролог: Соль и кровь", depth: 1, contentHtml: "<p>Вода. Бесконечная, тяжелая, древняя...</p><p>Мембранные слои переливаются... Каэде и Юмико.</p>" },
-        { title: "Глава 1: Знакомство с бездной", depth: 2, contentHtml: "<p>Каэде очнулся на берегу. Рядом лежала девушка с белыми волосами...</p>" },
-        { title: "Глава 2: Пожиратель и охотница", depth: 3, contentHtml: "<p>Широ, мутант-пожиратель, доживал последние дни...</p>" }
-    ];
-    let currentChapterIdx = 0;
+    // ========== НАСТРОЙКИ ==========
+    // Прямая ссылка на content.json в вашем репозитории GitHub
+    const JSON_URL = 'https://raw.githubusercontent.com/weather-report22/weather-report22.github.io/main/content.json';
+    // =================================
 
-    // ========== ПЕРСОНАЖИ ДЛЯ КАРТОЧЕК ==========
-    const charactersData = [
-        { name: "Каэде Амано", role: "Носитель (контракт 50/50)", desc: "Замкнутый парень, жажда мести, акулья сила.", icon: "⚔️" },
-        { name: "Юмико Сиранами", role: "Ёкай-акула", desc: "Любопытная, игривая, звёздные глаза.", icon: "🦈" },
-        { name: "Широ", role: "Пожиратель", desc: "Подавил инстинкт, ищет искупление.", icon: "🌊" },
-        { name: "Сая Кода", role: "Охотница → носитель", desc: "Из шахтёрского городка, гарпунная винтовка.", icon: "🏹" },
-        { name: "Кио Рио", role: "Жрица", desc: "Неравномерный контракт, слышит шёпот ёкая.", icon: "🌸" }
-    ];
+    // Глобальные переменные
+    let chapters = [];
+    let charactersData = [];
+    let currentChapterIdx = 0;
+    let loreHtml = "";
 
     // DOM-элементы
     const chapterDiv = document.getElementById('chapterContent');
@@ -435,103 +154,167 @@
     const charactersGrid = document.getElementById('charactersGrid');
     const themeToggle = document.getElementById('themeToggle');
     const devToggle = document.getElementById('devToggleBtn');
+    const syncStatusSpan = document.getElementById('syncStatus');
 
-    // ========== АВТОФОРМАТ ==========
+    // Хелперы
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
     function smartParagraphs(rawText) {
         if (!rawText.trim()) return "<p><em>Пустая глава</em></p>";
         let text = rawText.trim();
         if (text.includes("\n\n")) {
             let blocks = text.split(/\n\s*\n/);
-            return blocks.map(block => `<p>${escapeHtml(block.replace(/\n/g, ' ').trim())}</p>`).join('');
+            return blocks.map(b => `<p>${escapeHtml(b.replace(/\n/g, ' ').trim())}</p>`).join('');
         }
         let sentences = text.split(/(?<=[.!?])\s+/);
-        let paragraphs = [], buffer = [];
+        let paragraphs = [], buf = [];
         for (let s of sentences) {
-            buffer.push(s);
-            if (buffer.length >= 3 || (s.length > 70 && buffer.length >= 2)) {
-                paragraphs.push(buffer.join(' '));
-                buffer = [];
+            buf.push(s);
+            if (buf.length >= 3 || (s.length>70 && buf.length>=2) || s === sentences[sentences.length-1]) {
+                paragraphs.push(buf.join(' '));
+                buf = [];
             }
         }
-        if (buffer.length) paragraphs.push(buffer.join(' '));
         if (!paragraphs.length) paragraphs = [text];
         return paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
     }
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
-    function extractPlain(html) { let div = document.createElement('div'); div.innerHTML = html; return div.innerText; }
+    function extractPlain(html) { let d=document.createElement('div'); d.innerHTML=html; return d.innerText; }
 
-    // ========== ИНДИКАТОР ГЛУБИНЫ ==========
-    function updateDepthIndicator() {
-        let depth = chapters[currentChapterIdx]?.depth ?? 0;
-        document.querySelectorAll('.depth-tower span').forEach(span => {
-            let val = parseInt(span.dataset.depth);
-            if (val === depth) span.classList.add('active');
-            else span.classList.remove('active');
-        });
+    // Сохранение в localStorage (кеш)
+    function saveToLocalCache() {
+        const data = {
+            chapters: chapters,
+            lore: loreDiv.innerHTML,
+            characters: charactersData,
+            currentChapterIdx: currentChapterIdx
+        };
+        localStorage.setItem('abyss_cache', JSON.stringify(data));
+    }
+    function loadFromLocalCache() {
+        const saved = localStorage.getItem('abyss_cache');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.chapters) chapters = data.chapters;
+                if (data.lore) loreDiv.innerHTML = data.lore;
+                if (data.characters) charactersData = data.characters;
+                if (typeof data.currentChapterIdx === 'number') currentChapterIdx = data.currentChapterIdx;
+                return true;
+            } catch(e) { return false; }
+        }
+        return false;
     }
 
-    // ========== РЕНДЕР ГЛАВ ==========
-    function renderChapterSelector(filter = "") {
-        let filtered = chapters.filter((ch, idx) => ch.title.toLowerCase().includes(filter.toLowerCase()));
+    // Загрузка с GitHub
+    async function loadFromGitHub() {
+        syncStatusSpan.innerText = '☁️ загрузка...';
+        try {
+            const response = await fetch(JSON_URL, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.chapters && data.chapters.length) chapters = data.chapters;
+            if (data.lore) loreDiv.innerHTML = data.lore;
+            if (data.characters) charactersData = data.characters;
+            // Если в JSON нет currentChapterIdx, не трогаем
+            if (typeof data.currentChapterIdx === 'number') currentChapterIdx = data.currentChapterIdx;
+            else if (currentChapterIdx >= chapters.length) currentChapterIdx = 0;
+            saveToLocalCache();
+            syncStatusSpan.innerText = '✅ синхр.';
+            setTimeout(() => { if(syncStatusSpan.innerText === '✅ синхр.') syncStatusSpan.innerText = '☁️ онлайн'; }, 2000);
+            return true;
+        } catch (err) {
+            console.warn("Ошибка загрузки JSON с GitHub:", err);
+            syncStatusSpan.innerText = '⚠️ офлайн';
+            return false;
+        }
+    }
+
+    // Инициализация: сначала пробуем загрузить из кэша (чтобы сразу показать), потом обновляем с GitHub
+    async function initData() {
+        // Показываем кэш, если есть
+        const hasCache = loadFromLocalCache();
+        if (hasCache && chapters.length) {
+            renderCurrentChapter();
+            renderCharacters();
+        } else {
+            // Если кэша нет, показываем заглушку
+            chapters = [];
+            loreDiv.innerHTML = "<p>Загрузка данных...</p>";
+        }
+        // Затем грузим свежее с GitHub и обновляем UI
+        const success = await loadFromGitHub();
+        if (success) {
+            renderCurrentChapter();
+            renderCharacters();
+            // Обновляем глубину
+            updateDepthIndicator();
+        } else if (!hasCache) {
+            // совсем ничего нет — показываем сообщение
+            chapterDiv.innerHTML = "<p>Не удалось загрузить данные. Проверьте подключение к интернету или наличие файла content.json в репозитории.</p>";
+            loreDiv.innerHTML = "<p>Ошибка загрузки лора.</p>";
+        }
+    }
+
+    // UI функции
+    function renderChapterSelector(filter="") {
+        if (!chapters.length) return;
+        let filtered = chapters.filter((ch,idx) => ch.title.toLowerCase().includes(filter.toLowerCase()));
         chapterSelect.innerHTML = '';
-        filtered.forEach((ch, i) => {
+        filtered.forEach(ch => {
+            let idx = chapters.indexOf(ch);
             let opt = document.createElement('option');
-            opt.value = chapters.indexOf(ch);
-            opt.textContent = `${chapters.indexOf(ch)+1}. ${ch.title} (${ch.depth} км)`;
-            if (ch === chapters[currentChapterIdx]) opt.selected = true;
+            opt.value = idx;
+            opt.textContent = `${idx+1}. ${ch.title} (${ch.depth} км)`;
+            if (idx === currentChapterIdx) opt.selected = true;
             chapterSelect.appendChild(opt);
         });
     }
     function renderCurrentChapter() {
+        if (!chapters.length) return;
         chapterDiv.innerHTML = chapters[currentChapterIdx].contentHtml;
         renderChapterSelector(chapterSearch.value);
         updateDepthIndicator();
-        localStorage.setItem('lastChapterIdx', currentChapterIdx);
-        saveToLocal();
-        chapterDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        saveToLocalCache();
+        chapterDiv.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+    function updateDepthIndicator() {
+        if (!chapters.length) return;
+        let depth = chapters[currentChapterIdx]?.depth ?? 0;
+        document.querySelectorAll('.depth-tower span').forEach(span => {
+            let val = parseInt(span.dataset.depth);
+            span.classList.toggle('active', val === depth);
+        });
+    }
+    function fillDevPanel() {
+        if (chapters[currentChapterIdx]) {
+            chapterTitleInput.value = chapters[currentChapterIdx].title;
+            rawTextInput.value = extractPlain(chapters[currentChapterIdx].contentHtml);
+            depthSelect.value = chapters[currentChapterIdx].depth;
+        }
     }
     function changeChapter(delta) {
+        if (!chapters.length) return;
         let newIdx = currentChapterIdx + delta;
-        if (newIdx < 0) newIdx = 0;
-        if (newIdx >= chapters.length) newIdx = chapters.length - 1;
+        if (newIdx<0) newIdx=0;
+        if (newIdx>=chapters.length) newIdx=chapters.length-1;
         if (newIdx !== currentChapterIdx) {
             currentChapterIdx = newIdx;
             renderCurrentChapter();
             if (devPanel.classList.contains('open')) fillDevPanel();
         }
     }
-    function fillDevPanel() {
-        chapterTitleInput.value = chapters[currentChapterIdx].title;
-        rawTextInput.value = extractPlain(chapters[currentChapterIdx].contentHtml);
-        depthSelect.value = chapters[currentChapterIdx].depth;
-    }
-    function saveCurrentChapter() {
+    function saveCurrentChapterLocal() {
+        if (!chapters.length) return;
         chapters[currentChapterIdx].title = chapterTitleInput.value.trim() || `Глава ${currentChapterIdx+1}`;
         chapters[currentChapterIdx].contentHtml = smartParagraphs(rawTextInput.value);
         chapters[currentChapterIdx].depth = parseInt(depthSelect.value);
         renderCurrentChapter();
-        saveToLocal();
-        alert("Глава сохранена");
-    }
-    function saveToLocal() {
-        localStorage.setItem('abyss_chapters', JSON.stringify(chapters));
-        localStorage.setItem('abyss_lore', loreDiv.innerHTML);
-    }
-    function loadFromLocal() {
-        let saved = localStorage.getItem('abyss_chapters');
-        if (saved) chapters = JSON.parse(saved);
-        let savedLore = localStorage.getItem('abyss_lore');
-        loreDiv.innerHTML = savedLore || `<p>Мир на 95% вода, мембранные барьеры, ёкаи, контракты...</p><p>Исток — передовой материк, 11 уровней глубины, портал в мир первородных.</p>`;
-        let lastIdx = localStorage.getItem('lastChapterIdx');
-        if (lastIdx && chapters[parseInt(lastIdx)]) currentChapterIdx = parseInt(lastIdx);
-        else currentChapterIdx = 0;
-        renderCurrentChapter();
+        saveToLocalCache();
+        alert("Глава сохранена локально (только в вашем браузере). Чтобы обновить для всех, отредактируйте content.json на GitHub.");
     }
     function exportAll() {
-        let data = { chapters, lore: loreDiv.innerHTML };
-        let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        let data = { chapters, lore: loreDiv.innerHTML, characters: charactersData, currentChapterIdx };
         let a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
         a.download = 'abyss_backup.json';
         a.click();
     }
@@ -542,16 +325,16 @@
                 let data = JSON.parse(e.target.result);
                 if (data.chapters) chapters = data.chapters;
                 if (data.lore) loreDiv.innerHTML = data.lore;
-                currentChapterIdx = Math.min(currentChapterIdx, chapters.length-1);
+                if (data.characters) charactersData = data.characters;
+                if (typeof data.currentChapterIdx === 'number') currentChapterIdx = data.currentChapterIdx;
                 renderCurrentChapter();
-                saveToLocal();
-                alert("Импорт выполнен");
+                renderCharacters();
+                saveToLocalCache();
+                alert("Импорт выполнен локально. Для публикации экспортируйте и замените content.json на GitHub.");
             } catch(err) { alert("Ошибка JSON"); }
         };
         reader.readAsText(file);
     }
-
-    // ========== ОТРИСОВКА ПЕРСОНАЖЕЙ (карточки) ==========
     function renderCharacters() {
         charactersGrid.innerHTML = charactersData.map(ch => `
             <div class="character-card">
@@ -563,16 +346,17 @@
         `).join('');
     }
 
-    // ========== ТЕМА, СЕКЦИИ ==========
+    // Тема
     function setTheme(theme) {
         if (theme === 'light') { document.body.classList.add('light'); document.body.classList.remove('dark'); }
         else { document.body.classList.add('dark'); document.body.classList.remove('light'); }
         localStorage.setItem('theme_pref', theme);
     }
-    let theme = localStorage.getItem('theme_pref') || 'dark';
-    setTheme(theme);
+    let curTheme = localStorage.getItem('theme_pref') || 'dark';
+    setTheme(curTheme);
     themeToggle.onclick = () => setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 
+    // Секции
     const sections = { home: document.getElementById('home'), reader: document.getElementById('reader'), lore: document.getElementById('lore'), characters: document.getElementById('characters') };
     function showSection(id) {
         Object.values(sections).forEach(s => s.classList.remove('active-section'));
@@ -580,66 +364,60 @@
         localStorage.setItem('lastSection', id);
         if (id === 'characters') renderCharacters();
         if (id === 'reader') renderCurrentChapter();
-        if (id === 'lore') { /* уже загружено */ }
     }
-    document.querySelectorAll('.nav-btn[data-section]').forEach(btn => {
-        btn.addEventListener('click', () => showSection(btn.dataset.section));
-    });
+    document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
     document.getElementById('heroReadBtn').onclick = () => showSection('reader');
     document.getElementById('heroLoreBtn').onclick = () => showSection('lore');
     let lastSec = localStorage.getItem('lastSection');
     if (lastSec && sections[lastSec]) showSection(lastSec);
     else showSection('home');
 
-    // ========== РЕЖИМ РАЗРАБА И ХОТКЕЙ (Ctrl+E) ==========
+    // Режим разработчика
     function toggleDevPanel() {
         devPanel.classList.toggle('open');
         if (devPanel.classList.contains('open')) fillDevPanel();
     }
     devToggle.onclick = toggleDevPanel;
     window.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-            e.preventDefault();
-            toggleDevPanel();
-        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); toggleDevPanel(); }
     });
-    applyBtn.onclick = saveCurrentChapter;
+    applyBtn.onclick = saveCurrentChapterLocal;
     exportBtn.onclick = exportAll;
     importBtn.onclick = () => jsonFileInput.click();
     jsonFileInput.onchange = e => { if(e.target.files[0]) importJson(e.target.files[0]); jsonFileInput.value=''; };
 
-    // ========== НАВИГАЦИЯ, ПОИСК, ШРИФТ ==========
+    // Навигация
     prevBtn.onclick = () => changeChapter(-1);
     nextBtn.onclick = () => changeChapter(1);
     mobilePrev.onclick = () => changeChapter(-1);
     mobileNext.onclick = () => changeChapter(1);
     chapterSelect.onchange = (e) => { currentChapterIdx = parseInt(e.target.value); renderCurrentChapter(); if(devPanel.classList.contains('open')) fillDevPanel(); };
     chapterSearch.oninput = () => renderChapterSelector(chapterSearch.value);
+
+    // Шрифт
     let fontSize = parseInt(localStorage.getItem('fontSize')) || 20;
     chapterDiv.style.fontSize = fontSize+'px';
     document.getElementById('fontPlus').onclick = () => { fontSize = Math.min(32, fontSize+2); chapterDiv.style.fontSize = fontSize+'px'; localStorage.setItem('fontSize', fontSize); };
     document.getElementById('fontMinus').onclick = () => { fontSize = Math.max(14, fontSize-2); chapterDiv.style.fontSize = fontSize+'px'; localStorage.setItem('fontSize', fontSize); };
 
-    // свайпы
+    // Свайпы и стрелки
     let touchStart = 0;
     document.addEventListener('touchstart', e => { touchStart = e.changedTouches[0].screenX; });
-    document.addEventListener('touchend', e => {
-        let diff = e.changedTouches[0].screenX - touchStart;
-        if (Math.abs(diff) > 60) changeChapter(diff > 0 ? -1 : 1);
-    });
+    document.addEventListener('touchend', e => { let diff = e.changedTouches[0].screenX - touchStart; if (Math.abs(diff)>60) changeChapter(diff>0 ? -1 : 1); });
     window.addEventListener('keydown', e => { if(e.key === 'ArrowLeft') changeChapter(-1); if(e.key === 'ArrowRight') changeChapter(1); });
     window.addEventListener('beforeunload', () => { localStorage.setItem('scrollPos', window.scrollY); });
     window.addEventListener('load', () => { let sp = localStorage.getItem('scrollPos'); if(sp) window.scrollTo(0, parseInt(sp)); });
 
-    loadFromLocal();
-    renderCharacters();
-    // динамический фон при скролле
+    // Анимация фона
     const wave1 = document.getElementById('wave1'), wave2 = document.getElementById('wave2');
     window.addEventListener('scroll', () => {
         let p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
         if(wave1) wave1.style.transform = `translateX(${p*15}px) translateY(${p*6}px)`;
         if(wave2) wave2.style.transform = `translateX(${-p*12}px) translateY(${p*4}px)`;
     });
+
+    // Запуск
+    initData();
     setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
 </script>
 </body>
