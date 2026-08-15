@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Бездна — веб-ранобэ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&family=Literata:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body.dark { --bg1: #020c1a; --bg2: #061d30; --text: #e0f2fe; --surface: rgba(6,25,45,0.85); --accent: #00aaff; --border: #2c6f9b; --btn: #1a4d6b; --card-bg: rgba(8,28,48,0.9); }
@@ -52,7 +55,7 @@
         footer { text-align:center; padding:2rem; opacity:0.6; }
         .hotkey-hint { font-size:0.7rem; margin-left:8px; opacity:0.7; }
         .sync-status { font-size:0.8rem; margin-left:10px; background: var(--accent); padding:2px 8px; border-radius:20px; }
- 
+
         /* ===== Админ-панель: вкладки ===== */
         .dev-tabs { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
         .dev-tab-btn { background:#0a2a44; border:1px solid var(--border); color:var(--text); padding:6px 14px; border-radius:20px; font-size:0.85rem; width:auto; }
@@ -72,29 +75,65 @@
         .token-box input[type=checkbox] { width:auto; margin:0; }
         #tokenStatus, #publishStatus { font-size:0.85rem; margin-top:6px; }
         .publish-btn-main { font-size:1rem; padding:12px 24px; background:#0d7a3f; }
+
+        /* ===== Типографика ===== */
+        body { font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
+        .logo, .card h2 { font-family: 'Cinzel', serif; letter-spacing: 0.03em; }
+        #chapterContent { font-family: 'Literata', Georgia, serif; font-size: 1.15rem; }
+
+        /* ===== Авторизация ===== */
+        .auth-area { display:flex; align-items:center; gap:8px; }
+        .auth-btn { background: var(--btn); border:none; color:white; padding:6px 14px; border-radius:20px; font-size:0.85rem; cursor:pointer; }
+        .user-chip { display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 10px 2px 6px; font-size:0.8rem; }
+        .user-chip img { width:24px; height:24px; border-radius:50%; }
+        .user-chip button { background:none; border:none; color:var(--text); opacity:0.7; cursor:pointer; font-size:0.8rem; text-decoration:underline; }
+
+        /* ===== Тосты ===== */
+        .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#0a2a44ee; color:#e0f2fe; padding:10px 20px; border-radius:30px; border:1px solid var(--accent); font-size:0.9rem; opacity:0; pointer-events:none; transition:all 0.3s ease; z-index:100; max-width:80vw; text-align:center; }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* ===== История чтения ===== */
+        .history-list { display:flex; flex-direction:column; gap:10px; margin-top:1rem; }
+        .history-item { display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 18px; cursor:pointer; transition:transform 0.15s; }
+        .history-item:hover { transform:translateX(4px); border-color:var(--accent); }
+        .history-item .h-title { font-weight:600; }
+        .history-item .h-depth { font-size:0.8rem; opacity:0.7; }
+        .history-empty { opacity:0.7; font-size:0.9rem; }
+
+        /* ===== Мобильные улучшения ===== */
+        @media (max-width:780px) {
+            .chapter-nav { bottom:16px; right:16px; gap:10px; }
+            .chapter-nav button { width:58px; height:58px; font-size:1.7rem; box-shadow:0 4px 16px rgba(0,0,0,0.5); }
+            .sticky-nav { gap:0.35rem; padding:0.6rem 0.6rem; }
+            .sticky-nav button, .sticky-nav .auth-btn { font-size:0.78rem; padding:6px 10px; }
+            .hero .logo { font-size:3.2rem; }
+            .hero .tagline { font-size:1rem; }
+        }
     </style>
 </head>
 <body class="dark">
 <div class="animated-bg"><div class="wave" id="wave1"></div><div class="wave" id="wave2"></div></div>
 <div class="scroll-gradient"></div>
- 
+
 <div class="depth-tower" id="depthTower">
     <span data-depth="0">0км</span><span data-depth="1">1км</span><span data-depth="2">2км</span><span data-depth="3">3км</span>
     <span data-depth="4">4км</span><span data-depth="5">5км</span><span data-depth="6">6км</span><span data-depth="7">7км</span>
     <span data-depth="8">8км</span><span data-depth="9">9км</span><span data-depth="10">10км</span><span data-depth="11">11км</span>
 </div>
- 
+
 <div class="sticky-nav">
     <button class="nav-btn" data-section="home">🏠 Главная</button>
     <button class="nav-btn" data-section="reader">📖 Читать</button>
     <button class="nav-btn" data-section="lore">🌊 Энциклопедия</button>
     <button class="nav-btn" data-section="characters">👥 Персонажи</button>
+    <button class="nav-btn" data-section="history">📜 История</button>
     <button class="theme-toggle" id="themeToggle">🌓 Тема</button>
     <button class="dev-toggle" id="devToggleBtn">⚙️ Правка</button>
     <span class="hotkey-hint">[Ctrl+E]</span>
     <span id="syncStatus" class="sync-status">☁️ загрузка...</span>
+    <div class="auth-area" id="authArea"></div>
 </div>
- 
+
 <!-- ГЛАВНАЯ -->
 <section id="home" class="section">
     <div class="hero">
@@ -108,7 +147,7 @@
     </div>
     <div class="card"><h2>О проекте</h2><p>Мир на 95% состоит из воды. Мембранные барьеры скрывают ёкаев. Контент загружается из JSON-файла — автор обновляет его на GitHub, и читатели видят свежие главы через минуту.</p></div>
 </section>
- 
+
 <!-- ЧИТАЛКА -->
 <section id="reader" class="section">
     <div class="card">
@@ -120,7 +159,7 @@
             <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button></div>
         </div>
         <div id="chapterContent"></div>
- 
+
         <div id="devPanel" class="dev-panel">
             <div class="dev-tabs">
                 <button class="dev-tab-btn active" data-tab="chapters" type="button">📖 Главы</button>
@@ -128,7 +167,7 @@
                 <button class="dev-tab-btn" data-tab="characters" type="button">👥 Персонажи</button>
                 <button class="dev-tab-btn" data-tab="publish" type="button">🚀 Публикация</button>
             </div>
- 
+
             <!-- ВКЛАДКА: ГЛАВЫ -->
             <div class="dev-tab-content active" data-tab-content="chapters">
                 <div class="chapter-edit-toolbar">
@@ -142,19 +181,19 @@
                 <select id="depthSelect"><option value="0">0 км</option><option value="1">1 км</option><option value="2">2 км</option><option value="3">3 км</option><option value="4">4 км</option><option value="5">5 км</option><option value="6">6 км</option><option value="7">7 км</option><option value="8">8 км</option><option value="9">9 км</option><option value="10">10 км</option><option value="11">11 км</option></select>
                 <div><button id="applyTextFormatBtn" class="btn-sm" type="button">💾 Сохранить локально</button></div>
             </div>
- 
+
             <!-- ВКЛАДКА: ЭНЦИКЛОПЕДИЯ -->
             <div class="dev-tab-content" data-tab-content="lore">
                 <textarea id="loreTextInput" rows="10" placeholder="Текст энциклопедии (автоформат абзацев)"></textarea>
                 <div><button id="applyLoreBtn" class="btn-sm" type="button">💾 Сохранить локально</button></div>
             </div>
- 
+
             <!-- ВКЛАДКА: ПЕРСОНАЖИ -->
             <div class="dev-tab-content" data-tab-content="characters">
                 <div id="characterEditList"></div>
                 <button id="addCharacterBtn" class="btn-sm" type="button">➕ Новый персонаж</button>
             </div>
- 
+
             <!-- ВКЛАДКА: ПУБЛИКАЦИЯ -->
             <div class="dev-tab-content" data-tab-content="publish">
                 <div class="token-box">
@@ -174,7 +213,7 @@
                 </div>
                 <p id="publishStatus"></p>
             </div>
- 
+
             <div style="margin-top:14px; border-top:1px solid var(--border); padding-top:10px;">
                 <button id="exportAllBtn" class="btn-sm" type="button">📤 Экспорт JSON</button>
                 <button id="importJsonBtn" class="btn-sm" type="button">📂 Импорт JSON</button>
@@ -184,16 +223,30 @@
         </div>
     </div>
 </section>
- 
+
 <!-- ЭНЦИКЛОПЕДИЯ -->
 <section id="lore" class="section"><div class="card"><h2>🌊 Мир Бездны</h2><div id="loreContent"></div></div></section>
- 
+
 <!-- ПЕРСОНАЖИ -->
 <section id="characters" class="section"><div class="card"><h2>🗡️ Герои Бездны</h2><div id="charactersGrid" class="characters-grid"></div></div></section>
- 
+
+<!-- ИСТОРИЯ ЧТЕНИЯ -->
+<section id="history" class="section">
+    <div class="card">
+        <h2>📜 История чтения</h2>
+        <p id="historyHint" style="font-size:0.85rem; opacity:0.8; margin-bottom:0.5rem;">Прогресс сохраняется в этом браузере.</p>
+        <div id="historyList" class="history-list"></div>
+    </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
 <div class="chapter-nav"><button id="mobilePrev">◀</button><button id="mobileNext">▶</button></div>
 <footer>«Бездна» — контент из content.json | Ctrl+E для локального редактирования | Данные кэшируются в браузере</footer>
- 
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
     // ========== НАСТРОЙКИ ==========
     const GH_OWNER = 'weather-report22';
@@ -201,12 +254,35 @@
     const GH_BRANCH = 'main';
     const GH_FILE_PATH = 'content.json';
     const JSON_URL = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${GH_FILE_PATH}`;
+
+    // ---- Firebase: синхронизация прогресса чтения между устройствами ----
+    // Заполните своими значениями из Firebase Console → Project settings → General → Your apps (Web).
+    // apiKey здесь НЕ секрет — его безопасно публиковать в клиентском коде,
+    // защита строится на правилах доступа Firestore и списке разрешённых доменов в Auth.
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_eB_zD3aSIsJcvVTTrqqb7JUnyjYJIT8",
+        authDomain: "abyss-webnovel.firebaseapp.com",
+        projectId: "abyss-webnovel",
+        storageBucket: "abyss-webnovel.firebasestorage.app",
+        messagingSenderId: "592722644514",
+        appId: "1:592722644514:web:7000b0b190174d86f0447b"
+    };
+    let firebaseEnabled = false;
+    let auth = null, db = null;
+    try {
+        if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('ВАШ')) {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            firebaseEnabled = true;
+        }
+    } catch(e) { console.warn('Firebase не инициализирован:', e); }
     // =================================
- 
+
     let chapters = [];
     let charactersData = [];
     let currentChapterIdx = 0;
- 
+
     // DOM-элементы
     const chapterDiv = document.getElementById('chapterContent');
     const chapterSelect = document.getElementById('chapterSelect');
@@ -244,7 +320,11 @@
     const publishBtn = document.getElementById('publishBtn');
     const publishStatus = document.getElementById('publishStatus');
     const refreshFromGithubBtn = document.getElementById('refreshFromGithubBtn');
- 
+    const authArea = document.getElementById('authArea');
+    const toastEl = document.getElementById('toast');
+    const historyList = document.getElementById('historyList');
+    const historyHint = document.getElementById('historyHint');
+
     // Хелперы
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
     function escapeAttr(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -274,7 +354,143 @@
         bytes.forEach(b => { binary += String.fromCharCode(b); });
         return btoa(binary);
     }
- 
+
+    // ===== Тосты =====
+    function showToast(msg, duration=2200) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toastEl.classList.remove('show'), duration);
+    }
+
+    // ===== Прогресс чтения (глава + позиция скролла + прочитанные главы) =====
+    let readChapters = new Set();
+    let lastScrollPercent = 0;
+    let currentUser = null;
+    let scrollSaveTimer = null;
+    let cloudSaveTimer = null;
+
+    function chapterIdOf(ch) { return (ch && ch.title) ? ch.title.trim() : ''; }
+
+    function loadProgressLocal() {
+        try {
+            const raw = localStorage.getItem('abyss_progress');
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    }
+    function saveProgressLocal() {
+        const data = {
+            lastChapterId: chapters[currentChapterIdx] ? chapterIdOf(chapters[currentChapterIdx]) : null,
+            lastScrollPercent,
+            readChapters: Array.from(readChapters),
+            updatedAt: Date.now()
+        };
+        localStorage.setItem('abyss_progress', JSON.stringify(data));
+        return data;
+    }
+    function applyProgressData(data) {
+        if (!data) return;
+        if (Array.isArray(data.readChapters)) readChapters = new Set(data.readChapters);
+        if (typeof data.lastScrollPercent === 'number') lastScrollPercent = data.lastScrollPercent;
+        if (data.lastChapterId) {
+            const idx = chapters.findIndex(ch => chapterIdOf(ch) === data.lastChapterId);
+            if (idx !== -1) currentChapterIdx = idx;
+        }
+    }
+    async function loadProgressFromCloud() {
+        if (!firebaseEnabled || !db || !currentUser) return null;
+        try {
+            const doc = await db.collection('progress').doc(currentUser.uid).get();
+            if (doc.exists) return doc.data();
+        } catch(e) { console.warn('Не удалось загрузить прогресс из облака:', e); }
+        return null;
+    }
+    function saveProgressToCloud() {
+        if (!firebaseEnabled || !db || !currentUser) return;
+        clearTimeout(cloudSaveTimer);
+        cloudSaveTimer = setTimeout(async () => {
+            try {
+                const data = saveProgressLocal();
+                await db.collection('progress').doc(currentUser.uid).set(data, { merge: true });
+            } catch(e) { console.warn('Не удалось сохранить прогресс в облако:', e); }
+        }, 1500);
+    }
+    function persistProgress() {
+        saveProgressLocal();
+        saveProgressToCloud();
+    }
+    function markCurrentChapterRead() {
+        if (!chapters[currentChapterIdx]) return;
+        const id = chapterIdOf(chapters[currentChapterIdx]);
+        if (id) readChapters.add(id);
+    }
+
+    // ===== Авторизация =====
+    function updateAuthUI() {
+        if (!firebaseEnabled) {
+            authArea.innerHTML = '<span style="font-size:0.75rem; opacity:0.6;">Синхронизация не настроена</span>';
+            return;
+        }
+        if (currentUser) {
+            authArea.innerHTML = `<div class="user-chip">${currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="">` : '👤'}<span>${escapeAttr(currentUser.displayName || currentUser.email || 'Аккаунт')}</span><button id="logoutBtn">Выйти</button></div>`;
+            document.getElementById('logoutBtn').onclick = () => auth.signOut();
+        } else {
+            authArea.innerHTML = '<button class="auth-btn" id="loginBtn">🔑 Войти через Google</button>';
+            document.getElementById('loginBtn').onclick = doLogin;
+        }
+    }
+    function doLogin() {
+        if (!firebaseEnabled) { alert('Синхронизация через Google ещё не настроена автором сайта.'); return; }
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert('Ошибка входа: ' + err.message));
+    }
+    if (firebaseEnabled) {
+        auth.onAuthStateChanged(async user => {
+            currentUser = user;
+            updateAuthUI();
+            if (user) {
+                const cloudData = await loadProgressFromCloud();
+                const localData = loadProgressLocal();
+                if (cloudData && (!localData || (cloudData.updatedAt||0) >= (localData.updatedAt||0))) {
+                    applyProgressData(cloudData);
+                } else if (localData) {
+                    saveProgressToCloud();
+                }
+                if (chapters.length) {
+                    renderCurrentChapter({ restoreScroll: true });
+                    renderHistoryList();
+                }
+                showToast('Прогресс синхронизирован с аккаунтом');
+            }
+        });
+    } else {
+        updateAuthUI();
+    }
+
+    // ===== История чтения (список) =====
+    function renderHistoryList() {
+        if (!chapters.length) { historyList.innerHTML = '<p class="history-empty">Пока нет глав.</p>'; }
+        else if (!readChapters.size) { historyList.innerHTML = '<p class="history-empty">Вы ещё не читали ни одной главы.</p>'; }
+        else {
+            const items = chapters.map((ch, idx) => ({ ch, idx })).filter(x => readChapters.has(chapterIdOf(x.ch)));
+            historyList.innerHTML = items.map(({ch, idx}) => `
+                <div class="history-item" data-idx="${idx}">
+                    <div><div class="h-title">${escapeAttr(ch.title)}</div><div class="h-depth">${ch.depth} км</div></div>
+                    <span>${idx === currentChapterIdx ? '📖 сейчас' : '↗'}</span>
+                </div>
+            `).join('');
+        }
+        historyHint.textContent = firebaseEnabled
+            ? (currentUser ? 'Прогресс синхронизирован с вашим аккаунтом Google.' : 'Прогресс сохраняется в этом браузере. Войдите через Google, чтобы синхронизировать между устройствами.')
+            : 'Прогресс сохраняется в этом браузере.';
+    }
+    historyList.addEventListener('click', e => {
+        const item = e.target.closest('.history-item');
+        if (!item) return;
+        currentChapterIdx = parseInt(item.dataset.idx);
+        showSection('reader');
+        renderCurrentChapter();
+    });
+
     // Сохранение в localStorage (кеш)
     function saveToLocalCache() {
         const data = { chapters, lore: loreDiv.innerHTML, characters: charactersData, currentChapterIdx };
@@ -294,7 +510,7 @@
         }
         return false;
     }
- 
+
     // Загрузка с GitHub (публичный raw-файл, без токена)
     async function loadFromGitHub() {
         syncStatusSpan.innerText = '☁️ загрузка...';
@@ -317,7 +533,7 @@
             return false;
         }
     }
- 
+
     // Инициализация: сначала пробуем загрузить из кэша, потом обновляем с GitHub
     async function initData() {
         const hasCache = loadFromLocalCache();
@@ -338,7 +554,7 @@
             loreDiv.innerHTML = "<p>Ошибка загрузки лора.</p>";
         }
     }
- 
+
     // UI функции — читалка
     function renderChapterSelector(filter="") {
         if (!chapters.length) { chapterSelect.innerHTML = ''; return; }
@@ -353,13 +569,23 @@
             chapterSelect.appendChild(opt);
         });
     }
-    function renderCurrentChapter() {
+    function renderCurrentChapter(opts = {}) {
         if (!chapters.length) { chapterDiv.innerHTML = '<p><em>Глав пока нет. Добавьте первую во вкладке «Правка».</em></p>'; return; }
         chapterDiv.innerHTML = chapters[currentChapterIdx].contentHtml;
         renderChapterSelector(chapterSearch.value);
         updateDepthIndicator();
+        markCurrentChapterRead();
         saveToLocalCache();
-        chapterDiv.scrollIntoView({ behavior:'smooth', block:'start' });
+        if (opts.restoreScroll) {
+            requestAnimationFrame(() => {
+                const maxScroll = document.body.scrollHeight - window.innerHeight;
+                if (maxScroll > 0 && lastScrollPercent > 0) window.scrollTo(0, maxScroll * lastScrollPercent);
+            });
+        } else {
+            chapterDiv.scrollIntoView({ behavior:'smooth', block:'start' });
+            lastScrollPercent = 0;
+        }
+        persistProgress();
     }
     function updateDepthIndicator() {
         let depth = chapters[currentChapterIdx]?.depth ?? 0;
@@ -387,6 +613,7 @@
             currentChapterIdx = newIdx;
             renderCurrentChapter();
             if (devPanel.classList.contains('open')) fillDevPanel();
+            showToast(chapters[currentChapterIdx].title);
         }
     }
     function saveCurrentChapterLocal() {
@@ -435,7 +662,7 @@
             </div>
         `).join('');
     }
- 
+
     // ===== Глава: добавление / удаление / перестановка =====
     addChapterBtn.onclick = () => {
         const newChapter = { title: `Новая глава`, depth: chapters[currentChapterIdx]?.depth ?? 0, contentHtml: '<p>Текст главы...</p>' };
@@ -469,14 +696,14 @@
         renderCurrentChapter();
         saveToLocalCache();
     };
- 
+
     // ===== Энциклопедия =====
     applyLoreBtn.onclick = () => {
         loreDiv.innerHTML = smartParagraphs(loreTextInput.value);
         saveToLocalCache();
         alert("Энциклопедия сохранена локально.");
     };
- 
+
     // ===== Персонажи: редактирование списка =====
     function renderCharacterEditList() {
         characterEditList.innerHTML = charactersData.map((ch, i) => `
@@ -519,7 +746,7 @@
         renderCharacters();
         saveToLocalCache();
     };
- 
+
     // ===== Токен GitHub =====
     function getStoredToken() {
         return sessionStorage.getItem('gh_token') || localStorage.getItem('gh_token') || '';
@@ -547,7 +774,7 @@
         updateTokenStatus();
         publishStatus.textContent = '';
     };
- 
+
     // ===== Публикация в GitHub =====
     async function publishToGitHub() {
         const token = getStoredToken();
@@ -564,7 +791,7 @@
                 throw new Error(`GET ${getRes.status}`);
             }
             const fileData = await getRes.json();
- 
+
             publishStatus.textContent = '⏳ Отправляю изменения...';
             const dataObj = { chapters, lore: loreDiv.innerHTML, characters: charactersData, currentChapterIdx };
             const content = toBase64Utf8(JSON.stringify(dataObj, null, 2));
@@ -601,7 +828,7 @@
         fillDevPanel();
         publishStatus.textContent = ok ? '✅ Загружена актуальная версия с GitHub.' : '⚠️ Не удалось обновить.';
     };
- 
+
     // ===== Вкладки админ-панели =====
     document.querySelectorAll('.dev-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -614,7 +841,7 @@
             if (btn.dataset.tab === 'publish') updateTokenStatus();
         });
     });
- 
+
     // Тема
     function setTheme(theme) {
         if (theme === 'light') { document.body.classList.add('light'); document.body.classList.remove('dark'); }
@@ -624,7 +851,7 @@
     let curTheme = localStorage.getItem('theme_pref') || 'dark';
     setTheme(curTheme);
     themeToggle.onclick = () => setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
- 
+
     // Секции
     const sections = { home: document.getElementById('home'), reader: document.getElementById('reader'), lore: document.getElementById('lore'), characters: document.getElementById('characters') };
     function showSection(id) {
@@ -633,6 +860,7 @@
         localStorage.setItem('lastSection', id);
         if (id === 'characters') renderCharacters();
         if (id === 'reader') renderCurrentChapter();
+        if (id === 'history') renderHistoryList();
     }
     document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
     document.getElementById('heroReadBtn').onclick = () => showSection('reader');
@@ -640,7 +868,7 @@
     let lastSec = localStorage.getItem('lastSection');
     if (lastSec && sections[lastSec]) showSection(lastSec);
     else showSection('home');
- 
+
     // Режим разработчика
     function toggleDevPanel() {
         devPanel.classList.toggle('open');
@@ -659,7 +887,7 @@
     exportBtn.onclick = exportAll;
     importBtn.onclick = () => jsonFileInput.click();
     jsonFileInput.onchange = e => { if(e.target.files[0]) importJson(e.target.files[0]); jsonFileInput.value=''; };
- 
+
     // Навигация
     prevBtn.onclick = () => changeChapter(-1);
     nextBtn.onclick = () => changeChapter(1);
@@ -667,21 +895,33 @@
     mobileNext.onclick = () => changeChapter(1);
     chapterSelect.onchange = (e) => { currentChapterIdx = parseInt(e.target.value); renderCurrentChapter(); if(devPanel.classList.contains('open')) fillDevPanel(); };
     chapterSearch.oninput = () => renderChapterSelector(chapterSearch.value);
- 
+
     // Шрифт
     let fontSize = parseInt(localStorage.getItem('fontSize')) || 20;
     chapterDiv.style.fontSize = fontSize+'px';
     document.getElementById('fontPlus').onclick = () => { fontSize = Math.min(32, fontSize+2); chapterDiv.style.fontSize = fontSize+'px'; localStorage.setItem('fontSize', fontSize); };
     document.getElementById('fontMinus').onclick = () => { fontSize = Math.max(14, fontSize-2); chapterDiv.style.fontSize = fontSize+'px'; localStorage.setItem('fontSize', fontSize); };
- 
-    // Свайпы и стрелки
-    let touchStart = 0;
-    document.addEventListener('touchstart', e => { touchStart = e.changedTouches[0].screenX; });
-    document.addEventListener('touchend', e => { let diff = e.changedTouches[0].screenX - touchStart; if (Math.abs(diff)>60) changeChapter(diff>0 ? -1 : 1); });
+
+    // Свайпы и стрелки — жест должен быть явно горизонтальным, быстрым, и не задевать элементы управления
+    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    document.addEventListener('touchstart', e => {
+        const t = e.changedTouches[0];
+        touchStartX = t.screenX; touchStartY = t.screenY; touchStartTime = Date.now();
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+        if (!sections.reader.classList.contains('active-section')) return;
+        if (e.target.closest('button, select, input, textarea, a, .dev-panel')) return;
+        const t = e.changedTouches[0];
+        const dx = t.screenX - touchStartX;
+        const dy = t.screenY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+        const isHorizontalSwipe = Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 1.8 && dt < 700;
+        if (isHorizontalSwipe) changeChapter(dx > 0 ? -1 : 1);
+    }, { passive: true });
     window.addEventListener('keydown', e => { if(e.key === 'ArrowLeft') changeChapter(-1); if(e.key === 'ArrowRight') changeChapter(1); });
     window.addEventListener('beforeunload', () => { localStorage.setItem('scrollPos', window.scrollY); });
     window.addEventListener('load', () => { let sp = localStorage.getItem('scrollPos'); if(sp) window.scrollTo(0, parseInt(sp)); });
- 
+
     // Анимация фона
     const wave1 = document.getElementById('wave1'), wave2 = document.getElementById('wave2');
     window.addEventListener('scroll', () => {
@@ -689,10 +929,30 @@
         if(wave1) wave1.style.transform = `translateX(${p*15}px) translateY(${p*6}px)`;
         if(wave2) wave2.style.transform = `translateX(${-p*12}px) translateY(${p*4}px)`;
     });
- 
-    // Запуск
-    initData();
+
+    // Отслеживание позиции скролла в читалке — сохраняем, чтобы вернуться в то же место
+    window.addEventListener('scroll', () => {
+        if (!sections.reader.classList.contains('active-section') || !chapters.length) return;
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        lastScrollPercent = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
+        clearTimeout(scrollSaveTimer);
+        scrollSaveTimer = setTimeout(() => persistProgress(), 800);
+    });
+
+    // Запуск: сначала данные, затем — если есть сохранённый прогресс — сразу открываем читалку на нужном месте
+    async function initApp() {
+        await initData();
+        const localProg = loadProgressLocal();
+        applyProgressData(localProg);
+        renderCharacters();
+        renderHistoryList();
+        if (localProg && localProg.lastChapterId && chapters.length) {
+            showSection('reader');
+            renderCurrentChapter({ restoreScroll: true });
+        }
+    }
+    initApp();
     setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
 </script>
 </body>
-</html>
+</html>                                                                                                                                            
