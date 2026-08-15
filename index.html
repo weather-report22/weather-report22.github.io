@@ -109,9 +109,15 @@
             .hero .logo { font-size:3.2rem; }
             .hero .tagline { font-size:1rem; }
         }
+
+        /* ===== Шкала прогресса чтения ===== */
+        .reading-progress-bar { position:fixed; top:0; left:0; width:100%; height:4px; background:rgba(255,255,255,0.08); z-index:200; pointer-events:none; }
+        .reading-progress-fill { height:100%; width:0%; background:var(--accent); box-shadow:0 0 8px var(--accent); transition:width 0.15s ease; }
+        .chapter-progress-percent { font-size:0.85rem; opacity:0.85; margin-left:6px; background:var(--surface); padding:6px 12px; border-radius:20px; border:1px solid var(--border); display:inline-block; }
     </style>
 </head>
 <body class="dark">
+<div id="readingProgressBar" class="reading-progress-bar"><div id="readingProgressFill" class="reading-progress-fill"></div></div>
 <div class="animated-bg"><div class="wave" id="wave1"></div><div class="wave" id="wave2"></div></div>
 <div class="scroll-gradient"></div>
 
@@ -156,7 +162,7 @@
             <input type="text" id="chapterSearch" class="search-box" placeholder="🔍 Поиск главы...">
             <select id="chapterSelect" size="1"></select>
             <button id="nextChapter" class="btn-sm">След. ▶</button></div>
-            <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button></div>
+            <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button><span id="chapterProgressPercent" class="chapter-progress-percent">0%</span></div>
         </div>
         <div id="chapterContent"></div>
 
@@ -270,7 +276,7 @@
     let firebaseEnabled = false;
     let auth = null, db = null;
     try {
-        if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('Ваш')) {
+        if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('ВАШ')) {
             firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
@@ -324,6 +330,8 @@
     const toastEl = document.getElementById('toast');
     const historyList = document.getElementById('historyList');
     const historyHint = document.getElementById('historyHint');
+    const readingProgressFill = document.getElementById('readingProgressFill');
+    const chapterProgressPercent = document.getElementById('chapterProgressPercent');
 
     // Хелперы
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
@@ -363,12 +371,21 @@
         showToast._t = setTimeout(() => toastEl.classList.remove('show'), duration);
     }
 
+    // ===== Шкала прогресса чтения =====
+    function updateProgressBarUI() {
+        const pct = Math.round((lastScrollPercent || 0) * 100);
+        if (readingProgressFill) readingProgressFill.style.width = pct + '%';
+        if (chapterProgressPercent) chapterProgressPercent.textContent = pct + '%';
+    }
+
     // ===== Прогресс чтения (глава + позиция скролла + прочитанные главы) =====
     let readChapters = new Set();
     let lastScrollPercent = 0;
     let currentUser = null;
     let scrollSaveTimer = null;
     let cloudSaveTimer = null;
+    let progressReady = false; // становится true только после того, как реальный прогресс загружен и применён
+    let progressAppliedAt = 0; // updatedAt последних применённых данных — не даём более старым данным затереть более новые
 
     function chapterIdOf(ch) { return (ch && ch.title) ? ch.title.trim() : ''; }
 
@@ -390,12 +407,15 @@
     }
     function applyProgressData(data) {
         if (!data) return;
+        const ts = data.updatedAt || 0;
+        if (ts < progressAppliedAt) return; // это более старые данные, чем уже применённые — игнорируем
         if (Array.isArray(data.readChapters)) readChapters = new Set(data.readChapters);
         if (typeof data.lastScrollPercent === 'number') lastScrollPercent = data.lastScrollPercent;
         if (data.lastChapterId) {
             const idx = chapters.findIndex(ch => chapterIdOf(ch) === data.lastChapterId);
             if (idx !== -1) currentChapterIdx = idx;
         }
+        progressAppliedAt = ts || Date.now();
     }
     async function loadProgressFromCloud() {
         if (!firebaseEnabled || !db || !currentUser) return null;
@@ -416,6 +436,7 @@
         }, 1500);
     }
     function persistProgress() {
+        if (!progressReady) return; // ещё не загрузили настоящий прогресс — не даём затереть его "пустым" состоянием
         saveProgressLocal();
         saveProgressToCloud();
     }
@@ -448,13 +469,12 @@
             currentUser = user;
             updateAuthUI();
             if (user) {
-                const cloudData = await loadProgressFromCloud();
                 const localData = loadProgressLocal();
-                if (cloudData && (!localData || (cloudData.updatedAt||0) >= (localData.updatedAt||0))) {
-                    applyProgressData(cloudData);
-                } else if (localData) {
-                    saveProgressToCloud();
-                }
+                if (localData) applyProgressData(localData);
+                const cloudData = await loadProgressFromCloud();
+                if (cloudData) applyProgressData(cloudData);
+                else if (localData) saveProgressToCloud();
+                progressReady = true;
                 if (chapters.length) {
                     renderCurrentChapter({ restoreScroll: true });
                     renderHistoryList();
@@ -580,10 +600,12 @@
             requestAnimationFrame(() => {
                 const maxScroll = document.body.scrollHeight - window.innerHeight;
                 if (maxScroll > 0 && lastScrollPercent > 0) window.scrollTo(0, maxScroll * lastScrollPercent);
+                updateProgressBarUI();
             });
         } else {
             chapterDiv.scrollIntoView({ behavior:'smooth', block:'start' });
             lastScrollPercent = 0;
+            updateProgressBarUI();
         }
         persistProgress();
     }
@@ -935,6 +957,7 @@
         if (!sections.reader.classList.contains('active-section') || !chapters.length) return;
         const maxScroll = document.body.scrollHeight - window.innerHeight;
         lastScrollPercent = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
+        updateProgressBarUI();
         clearTimeout(scrollSaveTimer);
         scrollSaveTimer = setTimeout(() => persistProgress(), 800);
     });
@@ -944,6 +967,7 @@
         await initData();
         const localProg = loadProgressLocal();
         applyProgressData(localProg);
+        progressReady = true;
         renderCharacters();
         renderHistoryList();
         if (localProg && localProg.lastChapterId && chapters.length) {
@@ -955,4 +979,4 @@
     setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
 </script>
 </body>
-</html>                                                                                                                                            
+</html>
