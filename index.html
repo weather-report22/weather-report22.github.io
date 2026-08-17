@@ -110,14 +110,25 @@
             .hero .tagline { font-size:1rem; }
         }
 
-        /* ===== Шкала прогресса чтения ===== */
-        .reading-progress-bar { position:fixed; top:0; left:0; width:100%; height:4px; background:rgba(255,255,255,0.08); z-index:200; pointer-events:none; }
-        .reading-progress-fill { height:100%; width:0%; background:var(--accent); box-shadow:0 0 8px var(--accent); transition:width 0.15s ease; }
-        .chapter-progress-percent { font-size:0.85rem; opacity:0.85; margin-left:6px; background:var(--surface); padding:6px 12px; border-radius:20px; border:1px solid var(--border); display:inline-block; }
+        /* ===== Шкала прогресса чтения (боковая, статичная) ===== */
+        .side-progress-bar { position:fixed; right:18px; top:50%; transform:translateY(-50%); height:56vh; z-index:120; display:none; }
+        .side-progress-bar.active { display:block; }
+        .side-progress-track { position:relative; width:5px; height:100%; background:rgba(255,255,255,0.12); border-radius:5px; }
+        .side-progress-fill { position:absolute; top:0; left:0; width:100%; height:0%; background:var(--accent); border-radius:5px; box-shadow:0 0 10px var(--accent); transition:height 0.15s ease; }
+        .side-progress-badge { position:absolute; right:14px; top:0%; transform:translate(0,-50%); background:var(--surface); border:1px solid var(--accent); color:var(--text); font-size:0.75rem; padding:3px 9px; border-radius:20px; white-space:nowrap; transition:top 0.15s ease; }
+        @media (max-width:780px) {
+            .side-progress-bar { right:8px; height:44vh; }
+            .side-progress-badge { font-size:0.68rem; padding:2px 7px; right:12px; }
+        }
     </style>
 </head>
 <body class="dark">
-<div id="readingProgressBar" class="reading-progress-bar"><div id="readingProgressFill" class="reading-progress-fill"></div></div>
+<div id="sideProgressBar" class="side-progress-bar">
+    <div class="side-progress-track">
+        <div id="sideProgressFill" class="side-progress-fill"></div>
+        <div id="sideProgressBadge" class="side-progress-badge">0%</div>
+    </div>
+</div>
 <div class="animated-bg"><div class="wave" id="wave1"></div><div class="wave" id="wave2"></div></div>
 <div class="scroll-gradient"></div>
 
@@ -162,7 +173,7 @@
             <input type="text" id="chapterSearch" class="search-box" placeholder="🔍 Поиск главы...">
             <select id="chapterSelect" size="1"></select>
             <button id="nextChapter" class="btn-sm">След. ▶</button></div>
-            <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button><span id="chapterProgressPercent" class="chapter-progress-percent">0%</span></div>
+            <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button></div>
         </div>
         <div id="chapterContent"></div>
 
@@ -330,8 +341,9 @@
     const toastEl = document.getElementById('toast');
     const historyList = document.getElementById('historyList');
     const historyHint = document.getElementById('historyHint');
-    const readingProgressFill = document.getElementById('readingProgressFill');
-    const chapterProgressPercent = document.getElementById('chapterProgressPercent');
+    const sideProgressBar = document.getElementById('sideProgressBar');
+    const sideProgressFill = document.getElementById('sideProgressFill');
+    const sideProgressBadge = document.getElementById('sideProgressBadge');
 
     // Хелперы
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
@@ -371,11 +383,11 @@
         showToast._t = setTimeout(() => toastEl.classList.remove('show'), duration);
     }
 
-    // ===== Шкала прогресса чтения =====
+    // ===== Шкала прогресса чтения (боковая) =====
     function updateProgressBarUI() {
         const pct = Math.round((lastScrollPercent || 0) * 100);
-        if (readingProgressFill) readingProgressFill.style.width = pct + '%';
-        if (chapterProgressPercent) chapterProgressPercent.textContent = pct + '%';
+        if (sideProgressFill) sideProgressFill.style.height = pct + '%';
+        if (sideProgressBadge) { sideProgressBadge.style.top = pct + '%'; sideProgressBadge.textContent = pct + '%'; }
     }
 
     // ===== Прогресс чтения (глава + позиция скролла + прочитанные главы) =====
@@ -447,6 +459,13 @@
     }
 
     // ===== Авторизация =====
+    // Первое срабатывание onAuthStateChanged координируется с initApp через промис,
+    // чтобы главы гарантированно были загружены ДО применения облачного прогресса
+    // (иначе сопоставление главы по названию не срабатывает, и прогресс "теряется").
+    let authInitResolve;
+    const authInitPromise = new Promise(res => { authInitResolve = res; });
+    let authInitHandled = false;
+
     function updateAuthUI() {
         if (!firebaseEnabled) {
             authArea.innerHTML = '<span style="font-size:0.75rem; opacity:0.6;">Синхронизация не настроена</span>';
@@ -464,26 +483,36 @@
         if (!firebaseEnabled) { alert('Синхронизация через Google ещё не настроена автором сайта.'); return; }
         auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert('Ошибка входа: ' + err.message));
     }
-    if (firebaseEnabled) {
-        auth.onAuthStateChanged(async user => {
-            currentUser = user;
-            updateAuthUI();
-            if (user) {
+    async function handleAuthChange(user) {
+        currentUser = user;
+        updateAuthUI();
+        if (user) {
+            const cloudData = await loadProgressFromCloud();
+            if (cloudData) {
+                applyProgressData(cloudData);
+            } else {
                 const localData = loadProgressLocal();
-                if (localData) applyProgressData(localData);
-                const cloudData = await loadProgressFromCloud();
-                if (cloudData) applyProgressData(cloudData);
-                else if (localData) saveProgressToCloud();
-                progressReady = true;
-                if (chapters.length) {
-                    renderCurrentChapter({ restoreScroll: true });
-                    renderHistoryList();
-                }
-                showToast('Прогресс синхронизирован с аккаунтом');
+                if (localData) saveProgressToCloud();
             }
-        });
+        }
+        if (!authInitHandled) {
+            authInitHandled = true;
+            authInitResolve();
+        } else if (progressReady) {
+            // это вход/выход уже в процессе сессии (не при загрузке страницы) — сразу отражаем на экране
+            if (chapters.length) {
+                renderCurrentChapter({ restoreScroll: true });
+                renderHistoryList();
+            }
+            if (user) showToast('Прогресс синхронизирован с аккаунтом');
+        }
+    }
+    if (firebaseEnabled) {
+        auth.onAuthStateChanged(handleAuthChange);
     } else {
         updateAuthUI();
+        authInitHandled = true;
+        authInitResolve();
     }
 
     // ===== История чтения (список) =====
@@ -880,6 +909,7 @@
         Object.values(sections).forEach(s => s.classList.remove('active-section'));
         sections[id].classList.add('active-section');
         localStorage.setItem('lastSection', id);
+        if (sideProgressBar) sideProgressBar.classList.toggle('active', id === 'reader');
         if (id === 'characters') renderCharacters();
         if (id === 'reader') renderCurrentChapter();
         if (id === 'history') renderHistoryList();
@@ -964,13 +994,14 @@
 
     // Запуск: сначала данные, затем — если есть сохранённый прогресс — сразу открываем читалку на нужном месте
     async function initApp() {
-        await initData();
+        await initData(); // главы загружены
         const localProg = loadProgressLocal();
-        applyProgressData(localProg);
+        if (localProg) applyProgressData(localProg); // применяем локальный прогресс как базу
+        await authInitPromise; // дожидаемся первого ответа Firebase — облачный прогресс (если есть) уже применён поверх внутри handleAuthChange
         progressReady = true;
         renderCharacters();
         renderHistoryList();
-        if (localProg && localProg.lastChapterId && chapters.length) {
+        if (chapters.length && (readChapters.size > 0 || lastScrollPercent > 0)) {
             showSection('reader');
             renderCurrentChapter({ restoreScroll: true });
         }
