@@ -120,6 +120,46 @@
             .side-progress-bar { right:8px; height:44vh; }
             .side-progress-badge { font-size:0.68rem; padding:2px 7px; right:12px; }
         }
+
+        /* ===== Статус прочтения ===== */
+        .read-status-badge { display:inline-block; font-size:0.8rem; padding:4px 14px; border-radius:20px; margin-bottom:14px; border:1px solid var(--border); }
+        .read-status-badge.read { background:rgba(13,122,63,0.22); border-color:#0d7a3f; color:#8ee6b0; }
+        .read-status-badge.unread { background:rgba(255,255,255,0.04); opacity:0.75; }
+
+        /* ===== Комментарии ===== */
+        .comments-section { margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--border); }
+        .comments-section h3 { font-family:'Cinzel', serif; margin-bottom:1rem; font-size:1.2rem; }
+        .comments-list { display:flex; flex-direction:column; gap:14px; margin-bottom:1.2rem; }
+        .comment-item { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 16px; }
+        .comment-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
+        .comment-avatar { width:28px; height:28px; border-radius:50%; }
+        .comment-avatar-fallback { font-size:1.2rem; }
+        .comment-author { font-weight:600; font-size:0.9rem; }
+        .comment-date { font-size:0.75rem; opacity:0.6; margin-left:auto; }
+        .comment-delete-btn { background:none; border:none; color:var(--text); opacity:0.5; cursor:pointer; font-size:0.9rem; }
+        .comment-delete-btn:hover { opacity:1; }
+        .comment-text { font-size:0.95rem; white-space:pre-wrap; line-height:1.5; }
+        .comment-media { max-width:240px; max-height:240px; border-radius:12px; margin-top:8px; display:block; }
+        .comments-empty, .comments-loading { opacity:0.7; font-size:0.9rem; }
+        .comment-login-prompt { font-size:0.85rem; opacity:0.8; background:var(--surface); border:1px solid var(--border); padding:10px 16px; border-radius:14px; display:none; }
+        .comment-form { display:none; }
+        .comment-form-actions { display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+        .comment-form-actions .btn-sm:last-child { margin-left:auto; }
+        .comment-attach-preview:empty { display:none; }
+        .attach-preview-item { position:relative; display:inline-block; margin-bottom:8px; }
+        .attach-preview-item img { max-width:160px; max-height:160px; border-radius:10px; display:block; border:1px solid var(--border); }
+        .attach-preview-item button { position:absolute; top:-8px; right:-8px; background:#7a1a1a; border:none; color:white; width:24px; height:24px; border-radius:50%; cursor:pointer; }
+
+        /* ===== Модалка GIF ===== */
+        .gif-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300; align-items:center; justify-content:center; padding:20px; }
+        .gif-modal.open { display:flex; }
+        .gif-modal-inner { background:var(--card-bg); border:1px solid var(--accent); border-radius:20px; padding:16px; width:100%; max-width:520px; max-height:80vh; display:flex; flex-direction:column; }
+        .gif-modal-header { display:flex; gap:8px; margin-bottom:12px; }
+        .gif-modal-header input { flex:1; background:#031826; border:1px solid var(--accent); border-radius:18px; padding:10px 14px; color:#ddf4ff; }
+        .gif-results { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; overflow-y:auto; }
+        .gif-result-item { width:100%; border-radius:10px; cursor:pointer; transition:transform 0.15s; }
+        .gif-result-item:hover { transform:scale(1.05); }
+        .gif-loading { grid-column:1/-1; opacity:0.7; font-size:0.9rem; text-align:center; padding:20px 0; }
     </style>
 </head>
 <body class="dark">
@@ -175,7 +215,34 @@
             <button id="nextChapter" class="btn-sm">След. ▶</button></div>
             <div><button id="fontMinus" class="btn-sm">A-</button><button id="fontPlus" class="btn-sm">A+</button></div>
         </div>
+        <div id="readStatusBadge" class="read-status-badge"></div>
         <div id="chapterContent"></div>
+
+        <!-- КОММЕНТАРИИ -->
+        <div class="comments-section">
+            <h3>💬 Комментарии</h3>
+            <div id="commentsList" class="comments-list"></div>
+            <p id="commentLoginPrompt" class="comment-login-prompt">Войдите через Google, чтобы оставить комментарий.</p>
+            <div id="commentForm" class="comment-form">
+                <textarea id="commentText" rows="3" placeholder="Написать комментарий..."></textarea>
+                <div id="commentAttachPreview" class="comment-attach-preview"></div>
+                <div class="comment-form-actions">
+                    <button id="commentGifBtn" class="btn-sm" type="button">🎞 GIF</button>
+                    <button id="commentSubmitBtn" class="btn-sm" type="button" style="background:#0d7a3f;">Отправить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- МОДАЛКА ВЫБОРА GIF -->
+        <div id="gifModal" class="gif-modal">
+            <div class="gif-modal-inner">
+                <div class="gif-modal-header">
+                    <input type="text" id="gifSearchInput" placeholder="🔍 Поиск гифок...">
+                    <button id="gifModalClose" class="btn-sm" type="button">✕</button>
+                </div>
+                <div id="gifResults" class="gif-results"></div>
+            </div>
+        </div>
 
         <div id="devPanel" class="dev-panel">
             <div class="dev-tabs">
@@ -264,6 +331,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
     // ========== НАСТРОЙКИ ==========
     const GH_OWNER = 'weather-report22';
@@ -285,15 +353,20 @@
         appId: "1:592722644514:web:7000b0b190174d86f0447b"
     };
     let firebaseEnabled = false;
-    let auth = null, db = null;
+    let auth = null, db = null, storage = null;
     try {
         if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('ВАШ')) {
             firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
+            storage = firebase.storage();
             firebaseEnabled = true;
         }
     } catch(e) { console.warn('Firebase не инициализирован:', e); }
+
+    // Публичный демо-ключ Giphy (ограничен по нагрузке). Для боевого сайта получите свой бесплатный ключ
+    // на developers.giphy.com и замените значение ниже.
+    const GIPHY_API_KEY = 'dc6zaTOxFJmzC';
     // =================================
 
     let chapters = [];
@@ -344,6 +417,20 @@
     const sideProgressBar = document.getElementById('sideProgressBar');
     const sideProgressFill = document.getElementById('sideProgressFill');
     const sideProgressBadge = document.getElementById('sideProgressBadge');
+    const readStatusBadge = document.getElementById('readStatusBadge');
+    const commentsList = document.getElementById('commentsList');
+    const commentForm = document.getElementById('commentForm');
+    const commentLoginPrompt = document.getElementById('commentLoginPrompt');
+    const commentText = document.getElementById('commentText');
+    const commentAttachPreview = document.getElementById('commentAttachPreview');
+    const commentGifBtn = document.getElementById('commentGifBtn');
+    const commentPhotoBtn = document.getElementById('commentPhotoBtn');
+    const commentPhotoInput = document.getElementById('commentPhotoInput');
+    const commentSubmitBtn = document.getElementById('commentSubmitBtn');
+    const gifModal = document.getElementById('gifModal');
+    const gifModalClose = document.getElementById('gifModalClose');
+    const gifSearchInput = document.getElementById('gifSearchInput');
+    const gifResults = document.getElementById('gifResults');
 
     // Хелперы
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => m=='&'?'&amp;': m=='<'?'&lt;':'&gt;'); }
@@ -469,6 +556,7 @@
     function updateAuthUI() {
         if (!firebaseEnabled) {
             authArea.innerHTML = '<span style="font-size:0.75rem; opacity:0.6;">Синхронизация не настроена</span>';
+            updateCommentFormVisibility();
             return;
         }
         if (currentUser) {
@@ -478,6 +566,7 @@
             authArea.innerHTML = '<button class="auth-btn" id="loginBtn">🔑 Войти через Google</button>';
             document.getElementById('loginBtn').onclick = doLogin;
         }
+        updateCommentFormVisibility();
     }
     function doLogin() {
         if (!firebaseEnabled) { alert('Синхронизация через Google ещё не настроена автором сайта.'); return; }
@@ -514,6 +603,156 @@
         authInitHandled = true;
         authInitResolve();
     }
+
+    // ===== Комментарии =====
+    let commentsUnsubscribe = null;
+    let pendingGifUrl = null;
+    let pendingPhotoFile = null;
+
+    function updateCommentFormVisibility() {
+        if (!commentForm || !commentLoginPrompt) return;
+        if (firebaseEnabled && currentUser) {
+            commentForm.style.display = 'block';
+            commentLoginPrompt.style.display = 'none';
+        } else {
+            commentForm.style.display = 'none';
+            commentLoginPrompt.style.display = 'block';
+            commentLoginPrompt.textContent = firebaseEnabled
+                ? 'Войдите через Google, чтобы оставить комментарий.'
+                : 'Комментарии недоступны — синхронизация с аккаунтом не настроена.';
+        }
+    }
+    function loadCommentsForCurrentChapter() {
+        if (commentsUnsubscribe) { commentsUnsubscribe(); commentsUnsubscribe = null; }
+        if (!commentsList) return;
+        if (!firebaseEnabled || !db || !chapters[currentChapterIdx]) { commentsList.innerHTML = ''; return; }
+        const chId = chapterIdOf(chapters[currentChapterIdx]);
+        commentsList.innerHTML = '<p class="comments-loading">Загрузка комментариев...</p>';
+        commentsUnsubscribe = db.collection('comments')
+            .where('chapterId', '==', chId)
+            .orderBy('createdAt', 'asc')
+            .onSnapshot(snap => {
+                const items = [];
+                snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+                renderComments(items);
+            }, err => {
+                commentsList.innerHTML = '<p class="comments-empty">Не удалось загрузить комментарии.</p>';
+                console.warn('Ошибка загрузки комментариев:', err);
+            });
+    }
+    function renderComments(items) {
+        if (!items.length) { commentsList.innerHTML = '<p class="comments-empty">Комментариев пока нет — будьте первым!</p>'; return; }
+        commentsList.innerHTML = items.map(c => `
+            <div class="comment-item">
+                <div class="comment-header">
+                    ${c.authorPhoto ? `<img src="${escapeAttr(c.authorPhoto)}" class="comment-avatar" alt="">` : '<span class="comment-avatar-fallback">👤</span>'}
+                    <span class="comment-author">${escapeAttr(c.authorName || 'Читатель')}</span>
+                    <span class="comment-date">${c.createdAt && c.createdAt.toDate ? c.createdAt.toDate().toLocaleString('ru-RU') : 'только что'}</span>
+                    ${currentUser && c.authorUid === currentUser.uid ? `<button class="comment-delete-btn" data-id="${c.id}" title="Удалить">🗑</button>` : ''}
+                </div>
+                ${c.text ? `<p class="comment-text">${escapeHtml(c.text)}</p>` : ''}
+                ${c.gifUrl ? `<img src="${escapeAttr(c.gifUrl)}" class="comment-media" alt="gif">` : ''}
+                ${c.photoUrl ? `<img src="${escapeAttr(c.photoUrl)}" class="comment-media" alt="фото">` : ''}
+            </div>
+        `).join('');
+    }
+    commentsList.addEventListener('click', e => {
+        const btn = e.target.closest('.comment-delete-btn');
+        if (!btn) return;
+        if (!confirm('Удалить комментарий?')) return;
+        db.collection('comments').doc(btn.dataset.id).delete().catch(err => alert('Не удалось удалить: ' + err.message));
+    });
+    function clearAttachment() {
+        pendingGifUrl = null;
+        pendingPhotoFile = null;
+        commentAttachPreview.innerHTML = '';
+    }
+    function showAttachPreview(src) {
+        commentAttachPreview.innerHTML = `<div class="attach-preview-item"><img src="${src}"><button type="button" id="clearAttachBtn">✕</button></div>`;
+        document.getElementById('clearAttachBtn').onclick = clearAttachment;
+    }
+    commentPhotoBtn.onclick = () => commentPhotoInput.click();
+    commentPhotoInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert('Файл слишком большой (максимум 5 МБ).'); commentPhotoInput.value = ''; return; }
+        pendingPhotoFile = file;
+        pendingGifUrl = null;
+        const reader = new FileReader();
+        reader.onload = ev => showAttachPreview(ev.target.result);
+        reader.readAsDataURL(file);
+        commentPhotoInput.value = '';
+    };
+    async function uploadCommentPhoto(file) {
+        if (!storage) throw new Error('Загрузка фото не настроена (Firebase Storage).');
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `comment-images/${currentUser.uid}/${Date.now()}_${safeName}`;
+        const ref = storage.ref().child(path);
+        await ref.put(file);
+        return await ref.getDownloadURL();
+    }
+    commentSubmitBtn.onclick = async () => {
+        if (!currentUser) { alert('Войдите через Google, чтобы комментировать.'); return; }
+        const text = commentText.value.trim();
+        if (!text && !pendingGifUrl && !pendingPhotoFile) { alert('Напишите текст или прикрепите изображение.'); return; }
+        commentSubmitBtn.disabled = true;
+        commentSubmitBtn.textContent = 'Отправка...';
+        try {
+            let photoUrl = null;
+            if (pendingPhotoFile) photoUrl = await uploadCommentPhoto(pendingPhotoFile);
+            await db.collection('comments').add({
+                chapterId: chapterIdOf(chapters[currentChapterIdx]),
+                authorUid: currentUser.uid,
+                authorName: currentUser.displayName || 'Читатель',
+                authorPhoto: currentUser.photoURL || null,
+                text: text || null,
+                gifUrl: pendingGifUrl || null,
+                photoUrl: photoUrl || null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            commentText.value = '';
+            clearAttachment();
+        } catch (err) {
+            alert('Не удалось отправить комментарий: ' + err.message);
+        } finally {
+            commentSubmitBtn.disabled = false;
+            commentSubmitBtn.textContent = 'Отправить';
+        }
+    };
+
+    // ===== Выбор GIF (Giphy) =====
+    let gifSearchTimer = null;
+    commentGifBtn.onclick = () => {
+        gifModal.classList.add('open');
+        gifSearchInput.value = '';
+        searchGifs('привет');
+        gifSearchInput.focus();
+    };
+    gifModalClose.onclick = () => gifModal.classList.remove('open');
+    gifModal.addEventListener('click', e => { if (e.target === gifModal) gifModal.classList.remove('open'); });
+    gifSearchInput.oninput = () => {
+        clearTimeout(gifSearchTimer);
+        gifSearchTimer = setTimeout(() => searchGifs(gifSearchInput.value.trim() || 'реакция'), 400);
+    };
+    async function searchGifs(query) {
+        gifResults.innerHTML = '<p class="gif-loading">Ищем...</p>';
+        try {
+            const res = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=15&rating=pg-13&lang=ru`);
+            const data = await res.json();
+            if (!data.data || !data.data.length) { gifResults.innerHTML = '<p class="gif-loading">Ничего не найдено.</p>'; return; }
+            gifResults.innerHTML = data.data.map(g => `<img src="${g.images.fixed_width_small.url}" data-full="${g.images.fixed_width.url}" class="gif-result-item" alt="gif">`).join('');
+        } catch (e) {
+            gifResults.innerHTML = '<p class="gif-loading">Ошибка загрузки GIF.</p>';
+        }
+    }
+    gifResults.addEventListener('click', e => {
+        const img = e.target.closest('.gif-result-item');
+        if (!img) return;
+        pendingGifUrl = img.dataset.full;
+        pendingPhotoFile = null;
+        showAttachPreview(pendingGifUrl);
+        gifModal.classList.remove('open');
+    });
 
     // ===== История чтения (список) =====
     function renderHistoryList() {
@@ -613,10 +852,17 @@
             let idx = chapters.indexOf(ch);
             let opt = document.createElement('option');
             opt.value = idx;
-            opt.textContent = `${idx+1}. ${ch.title} (${ch.depth} км)`;
+            const mark = readChapters.has(chapterIdOf(ch)) ? '✓ ' : '○ ';
+            opt.textContent = `${mark}${idx+1}. ${ch.title} (${ch.depth} км)`;
             if (idx === currentChapterIdx) opt.selected = true;
             chapterSelect.appendChild(opt);
         });
+    }
+    function updateReadStatusBadge() {
+        if (!readStatusBadge || !chapters[currentChapterIdx]) return;
+        const isRead = readChapters.has(chapterIdOf(chapters[currentChapterIdx]));
+        readStatusBadge.textContent = isRead ? '✅ Прочитано' : '◯ Не прочитано';
+        readStatusBadge.className = 'read-status-badge ' + (isRead ? 'read' : 'unread');
     }
     function renderCurrentChapter(opts = {}) {
         if (!chapters.length) { chapterDiv.innerHTML = '<p><em>Глав пока нет. Добавьте первую во вкладке «Правка».</em></p>'; return; }
@@ -624,6 +870,8 @@
         renderChapterSelector(chapterSearch.value);
         updateDepthIndicator();
         markCurrentChapterRead();
+        updateReadStatusBadge();
+        loadCommentsForCurrentChapter();
         saveToLocalCache();
         if (opts.restoreScroll) {
             requestAnimationFrame(() => {
